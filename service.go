@@ -33,8 +33,8 @@ type ServiceConfig struct {
 	Nc          *nats.Conn        // NATS connection
 	Logger      *slog.Logger      // Service logger
 	Name        string            `json:"name"`               // Service name
-	Group       string            `json:"group"`              // group, prefix all endpoint subjects
-	Version     string            `json:"version"`            // Service version
+	Group       string            `json:"group"`              // group, prefix all endpoint subjects if not empty
+	Version     string            `json:"version"`            // Service version (must be SerVer)
 	Description string            `json:"description"`        // Service description
 	Metadata    map[string]string `json:"metadata,omitempty"` // Additional metadata
 }
@@ -52,6 +52,9 @@ func (sc *ServiceConfig) Validate() error {
 	}
 	if sc.Name == "" {
 		return errors.New("service name required")
+	}
+	if sc.Version == "" {
+		return errors.New("service version required")
 	}
 	return nil
 }
