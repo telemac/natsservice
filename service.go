@@ -105,6 +105,10 @@ func (svc *Service) AddEndpoint(endpointer Endpointer) error {
 	if endpointer == nil {
 		return errors.New("nil endpointer")
 	}
+	if svc.microSvc == nil {
+		return errors.New("micro service not initialized")
+	}
+
 	endpointer.SetService(svc)
 	config := endpointer.Config()
 	if config == nil {
@@ -123,7 +127,7 @@ func (svc *Service) AddEndpoint(endpointer Endpointer) error {
 	}
 
 	// Configure metadata
-	if len(config.Metadata) > 0 && len(config.Metadata) == 0 {
+	if len(config.Metadata) > 0 {
 		opts = append(opts, micro.WithEndpointMetadata(config.Metadata))
 	}
 
@@ -143,6 +147,9 @@ func (svc *Service) AddEndpoint(endpointer Endpointer) error {
 
 func (svc *Service) AddEndpoints(endpoints ...Endpointer) error {
 	for _, endpoint := range endpoints {
+		if endpoint == nil {
+			return errors.New("nil endpointer")
+		}
 		err := svc.AddEndpoint(endpoint)
 		if err != nil {
 			endpointName := endpoint.Config().Name
