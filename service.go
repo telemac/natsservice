@@ -19,6 +19,9 @@ type Servicer interface {
 	Config() *ServiceConfig
 	AddEndpoint(endpointer Endpointer) error
 	AddEndpoints(endpointer ...Endpointer) error
+	Ctx() context.Context
+	Nc() *nats.Conn
+	Logger() *slog.Logger
 }
 
 var _ Servicer = (*Service)(nil)
@@ -99,6 +102,21 @@ func (svc *Service) Stop() error {
 // Config returns the current service configuration
 func (svc *Service) Config() *ServiceConfig {
 	return svc.config
+}
+
+// Ctx returns the context associated with the service configuration for cancellation and propagation.
+func (svc *Service) Ctx() context.Context {
+	return svc.config.Ctx
+}
+
+// Nc returns the NATS connection configured for the service.
+func (svc *Service) Nc() *nats.Conn {
+	return svc.config.Nc
+}
+
+// Logger returns the logger configured for the service.
+func (svc *Service) Logger() *slog.Logger {
+	return svc.config.Logger
 }
 
 func (svc *Service) AddEndpoint(endpointer Endpointer) error {

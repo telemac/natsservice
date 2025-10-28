@@ -32,7 +32,7 @@ func (e *Endpoint1) Config() *natsservice.EndpointConfig {
 }
 
 func (e *Endpoint1) Handle(request micro.Request) {
-	log := e.Service().Config().Logger
+	log := e.Service().Logger()
 	e.Common.Counter++
 	log.Info("endpoint handler",
 		"service", e.Service().Config().Name,

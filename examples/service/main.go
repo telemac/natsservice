@@ -7,6 +7,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/telemac/goutils/task"
 	"github.com/telemac/natsservice"
+	"github.com/telemac/natsservice/examples/service/endpoints/add"
 	"github.com/telemac/natsservice/examples/service/endpoints/endpoint1"
 	"github.com/telemac/natsservice/examples/service/endpoints/endpoint2"
 	"github.com/telemac/natsservice/examples/service/pkg/counter"
@@ -49,7 +50,9 @@ func main() {
 
 	endpoin1 := endpoint1.New(commonCounter)
 	endpoin2 := endpoint2.New(commonCounter)
-	err = service.AddEndpoints(endpoin1, endpoin2)
+	addEndpoint := add.New()
+
+	err = service.AddEndpoints(endpoin1, endpoin2, addEndpoint)
 	if err != nil {
 		log.Error("Failed to add endpoint 1", "error", err)
 		return
