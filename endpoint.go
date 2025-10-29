@@ -11,11 +11,11 @@ type EndpointConfig struct {
 	UserData   any               `json:"-"`
 }
 
-var _ Endpointer = (*Endpoint)(nil)
-
+// Endpoint is a base struct that provides common functionality for endpoints.
+// It should be embedded in concrete endpoint implementations.
+// Note: Endpoint does NOT implement Endpointer interface by itself -
+// concrete implementations must provide Config() and Handle() methods.
 type Endpoint struct {
-	Endpointer
-	config  *EndpointConfig
 	service *Service
 }
 
