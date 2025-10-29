@@ -41,7 +41,7 @@ func CallAddEndpoint(ctx context.Context, nc *nats.Conn, a, b float64) (float64,
 
 	// Call the generic Request function
 	// Note: The subject should match the endpoint's subject configuration
-	// Based on the add.go config, it uses an empty subject which defaults to "calc.add"
+	// The service uses Group: "demo" and the endpoint name is "add", resulting in "demo.add"
 	response, err := natsservice.Request[add.AddRequest, add.AddResponse](
 		ctx,
 		nc,

@@ -23,6 +23,13 @@ func Request[TRequest, TResponse any](
 	subject string,
 	request TRequest,
 ) (*TResponse, error) {
+	// Validate connection
+	if nc == nil {
+		return nil, fmt.Errorf("NATS connection is nil")
+	}
+	if !nc.IsConnected() {
+		return nil, fmt.Errorf("NATS connection is not active")
+	}
 
 	// Marshal the request
 	reqData, err := json.Marshal(request)
@@ -59,6 +66,14 @@ func RequestAsync[TRequest any](
 	request TRequest,
 	handler func(*nats.Msg),
 ) error {
+	// Validate connection
+	if nc == nil {
+		return fmt.Errorf("NATS connection is nil")
+	}
+	if !nc.IsConnected() {
+		return fmt.Errorf("NATS connection is not active")
+	}
+
 	// Marshal the request
 	reqData, err := json.Marshal(request)
 	if err != nil {
@@ -98,6 +113,14 @@ func Publish[TRequest any](
 	subject string,
 	request TRequest,
 ) error {
+	// Validate connection
+	if nc == nil {
+		return fmt.Errorf("NATS connection is nil")
+	}
+	if !nc.IsConnected() {
+		return fmt.Errorf("NATS connection is not active")
+	}
+
 	// Marshal the request
 	reqData, err := json.Marshal(request)
 	if err != nil {

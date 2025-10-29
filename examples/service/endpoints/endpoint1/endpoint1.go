@@ -33,11 +33,11 @@ func (e *Endpoint1) Config() *natsservice.EndpointConfig {
 
 func (e *Endpoint1) Handle(request micro.Request) {
 	log := e.Service().Logger()
-	e.Common.Counter++
+	e.Common.Increment()
 	log.Info("endpoint handler",
 		"service", e.Service().Config().Name,
 		"endpoint", e.Config().Name,
 		"version", e.Service().Config().Version,
-		"counter", e.Common.Counter)
-	request.RespondJSON(e.Common.Counter)
+		"counter", e.Common.Counter())
+	request.RespondJSON(e.Common.Counter())
 }

@@ -92,6 +92,9 @@ func StartService(config *ServiceConfig) (*Service, error) {
 
 // Stop gracefully stops the NATS microservice
 func (svc *Service) Stop() error {
+	if svc.microSvc == nil {
+		return nil // Nothing to stop
+	}
 	return svc.microSvc.Stop()
 }
 
