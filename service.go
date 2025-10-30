@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	"github.com/nats-io/nats.go/micro"
 )
 
@@ -21,6 +22,7 @@ type Servicer interface {
 	AddEndpoints(endpointer ...Endpointer) error
 	Ctx() context.Context
 	Nc() *nats.Conn
+	Jetstream() jetstream.JetStream
 	Logger() *slog.Logger
 }
 
@@ -32,8 +34,9 @@ type Service struct {
 }
 
 type ServiceConfig struct {
-	Ctx         context.Context   // Service context for cancellation
-	Nc          *nats.Conn        // NATS connection
+	Ctx         context.Context // Service context for cancellation
+	Nc          *nats.Conn      // NATS connection
+	Js          jetstream.JetStream
 	Logger      *slog.Logger      // Service logger
 	Name        string            `json:"name"`               // Service name
 	Group       string            `json:"group"`              // group, prefix all endpoint subjects if not empty
@@ -71,6 +74,17 @@ func StartService(config *ServiceConfig) (*Service, error) {
 		return svc, fmt.Errorf("invalid service config: %w", err)
 	}
 	svc.config = config
+
+	if !svc.config.Nc.IsConnected() {
+		return svc, errors.New("nats not connected")
+	}
+
+	if svc.config.Js != nil {
+		_, err = svc.config.Js.AccountInfo(svc.config.Ctx)
+		if err != nil {
+			return svc, errors.New("jetstream not available")
+		}
+	}
 
 	// Build micro service configuration
 	microConfig := micro.Config{
@@ -115,6 +129,11 @@ func (svc *Service) Ctx() context.Context {
 // Nc returns the NATS connection configured for the service.
 func (svc *Service) Nc() *nats.Conn {
 	return svc.config.Nc
+}
+
+// Jetstream returns the JetStream instance associated with the service.
+func (svc *Service) Jetstream() jetstream.JetStream {
+	return svc.config.Js
 }
 
 // Logger returns the logger configured for the service.

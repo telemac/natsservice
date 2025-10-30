@@ -1,6 +1,11 @@
 package natsservice
 
-import "github.com/nats-io/nats.go/micro"
+import (
+	"encoding/json"
+	"log/slog"
+
+	"github.com/nats-io/nats.go/micro"
+)
 
 // EndpointConfig holds configuration for individual endpoints
 type EndpointConfig struct {
@@ -32,4 +37,23 @@ type Endpointer interface {
 	Config() *EndpointConfig
 	Service() *Service
 	SetService(*Service)
+}
+
+// UnmarshalRequest unmarshals request data and handles errors automatically
+func UnmarshalRequest[T any](request micro.Request) (*T, error) {
+	var result T
+	if err := json.Unmarshal(request.Data(), &result); err != nil {
+		request.Error("400", "invalid request format", nil)
+		return nil, err
+	}
+	return &result, nil
+}
+
+// UnmarshalRequestWithLog unmarshals the request into the specified type and logs errors if unmarshaling fails.
+func UnmarshalRequestWithLog[T any](request micro.Request, log *slog.Logger) (*T, error) {
+	result, err := UnmarshalRequest[T](request)
+	if err != nil {
+		log.Error("failed to unmarshal request", "error", err)
+	}
+	return result, err
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 	"github.com/telemac/goutils/task"
 	"github.com/telemac/natsservice"
 	"github.com/telemac/natsservice/examples/service/endpoints/add"
@@ -29,9 +30,16 @@ func main() {
 	}
 	defer nc.Close()
 
+	var js jetstream.JetStream
+	js, err = jetstream.New(nc)
+	if err != nil {
+		log.Error("Failed to create JetStream", "error", err)
+	}
+
 	service, err := natsservice.StartService(&natsservice.ServiceConfig{
 		Ctx:         ctx,
 		Nc:          nc,
+		Js:          js,
 		Logger:      log,
 		Name:        "demo-service",
 		Group:       "demo",
