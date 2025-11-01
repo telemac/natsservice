@@ -79,6 +79,7 @@ func StartService(config *ServiceConfig) (*Service, error) {
 		return svc, errors.New("nats not connected")
 	}
 
+	// check jetstream availability
 	if svc.config.Js != nil {
 		_, err = svc.config.Js.AccountInfo(svc.config.Ctx)
 		if err != nil {
