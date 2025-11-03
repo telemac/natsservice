@@ -65,7 +65,7 @@ RecoverPanic automatically:
 - Logs the error with service context
 - Returns a "500 internal error" response to the client
 
-See the [endpoint_can_panic example](examples/service/endpoints/endpoint_can_panic/) for a complete implementation with panic recovery.
+See the [endpoint_can_panic example](examples/demo_service/endpoints/endpoint_can_panic/) for a complete implementation with panic recovery.
 
 ## Examples
 
@@ -80,7 +80,7 @@ nats req demo.greet "Alexandre"
 ```
 
 ### Multi-Endpoint Service
-See [examples/service](./examples/service) - Demonstrates multiple endpoints sharing a common counter.
+See [examples/demo_service](./examples/demo_service) - Demonstrates multiple endpoints sharing a common counter.
 
 
 

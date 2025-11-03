@@ -8,10 +8,10 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/telemac/goutils/task"
 	"github.com/telemac/natsservice"
-	"github.com/telemac/natsservice/examples/service/endpoints/add"
-	"github.com/telemac/natsservice/examples/service/endpoints/endpoint1"
-	"github.com/telemac/natsservice/examples/service/endpoints/endpoint_can_panic"
-	"github.com/telemac/natsservice/examples/service/pkg/counter"
+	"github.com/telemac/natsservice/examples/demo_service/endpoints/add"
+	"github.com/telemac/natsservice/examples/demo_service/endpoints/endpoint1"
+	"github.com/telemac/natsservice/examples/demo_service/endpoints/endpoint_can_panic"
+	"github.com/telemac/natsservice/examples/demo_service/pkg/counter"
 )
 
 func main() {

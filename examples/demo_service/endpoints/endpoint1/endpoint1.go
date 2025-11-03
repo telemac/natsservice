@@ -3,7 +3,7 @@ package endpoint1
 import (
 	"github.com/nats-io/nats.go/micro"
 	"github.com/telemac/natsservice"
-	"github.com/telemac/natsservice/examples/service/pkg/counter"
+	"github.com/telemac/natsservice/examples/demo_service/pkg/counter"
 )
 
 var _ natsservice.Endpointer = (*Endpoint1)(nil)

@@ -7,7 +7,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/telemac/natsservice"
-	"github.com/telemac/natsservice/examples/service/endpoints/add"
+	"github.com/telemac/natsservice/examples/demo_service/endpoints/add"
 )
 
 func main() {

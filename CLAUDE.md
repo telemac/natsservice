@@ -27,7 +27,7 @@ Key components:
 ### Build and Run
 ```bash
 # Run the example service
-go run examples/service/main.go
+go run examples/demo_service/main.go
 
 # Build the module
 go build ./...
