@@ -57,3 +57,31 @@ func UnmarshalRequestWithLog[T any](request micro.Request, log *slog.Logger) (*T
 	}
 	return result, err
 }
+
+// RecoverPanic handles a panic occurring during the execution of an endpoint.
+// It should be called as the first statement in an endpoint Handle method using `defer`.
+//
+// RecoverPanic automatically:
+// - Catches any panic and prevents service crash
+// - Logs the panic with service and endpoint context
+// - Sends a "500 internal error" response to the client
+//
+// Usage:
+//
+//	func (e *MyEndpoint) Handle(request micro.Request) {
+//		defer natsservice.RecoverPanic(e, request)
+//		// Your endpoint logic here
+//	}
+//
+// This ensures your service remains stable even when unexpected panics occur,
+// providing graceful error handling and proper client responses.
+func RecoverPanic(e Endpointer, request micro.Request) {
+	if r := recover(); r != nil {
+		log := e.Service().Logger().With(
+			"service", e.Service().Config().Name,
+			"endpoint", e.Config().Name,
+		)
+		log.Error("service endpoint panicked", "panic", r)
+		request.Error("500", "internal error", nil)
+	}
+}

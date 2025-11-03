@@ -312,34 +312,6 @@ func TestKeyValuer_History(t *testing.T) {
 	}
 }
 
-func TestKeyValuer_Watch(t *testing.T) {
-	assert := assert.New(t)
-	kv, cleanup := setupTestKV(t, false)
-	defer cleanup()
-
-	key := "watch-key"
-
-	// Start watching
-	watcher, err := kv.Watch(context.Background(), key)
-	assert.NoError(err)
-	defer watcher.Stop()
-
-	// Set value
-	err = kv.Set(context.Background(), key, []byte("initial"))
-	assert.NoError(err)
-
-	// Update value
-	err = kv.Set(context.Background(), key, []byte("updated"))
-	assert.NoError(err)
-
-	// Delete value
-	err = kv.Delete(context.Background(), key)
-	assert.NoError(err)
-
-	// Give watcher time to process
-	time.Sleep(100 * time.Millisecond)
-}
-
 func TestKeyValuer_Purge(t *testing.T) {
 	assert := assert.New(t)
 

@@ -46,6 +46,27 @@ err = svc.AddEndpoint(&GreetingEndpoint{})
 if err != nil { panic(err) }
 ```
 
+## Error Handling & Panic Recovery
+
+Protect your endpoints from panics using the built-in RecoverPanic function:
+
+```go
+func (e *GreetingEndpoint) Handle(req micro.Request) {
+    defer natsservice.RecoverPanic(e, request) // Add this line
+
+    name := string(req.Data())
+    message := fmt.Sprintf("Hello, %s !", name)
+    req.Respond([]byte(message))
+}
+```
+
+RecoverPanic automatically:
+- Catches any panic in your endpoint
+- Logs the error with service context
+- Returns a "500 internal error" response to the client
+
+See the [endpoint_can_panic example](examples/service/endpoints/endpoint_can_panic/) for a complete implementation with panic recovery.
+
 ## Examples
 
 ### Basic Greeting Service

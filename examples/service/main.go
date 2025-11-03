@@ -10,7 +10,7 @@ import (
 	"github.com/telemac/natsservice"
 	"github.com/telemac/natsservice/examples/service/endpoints/add"
 	"github.com/telemac/natsservice/examples/service/endpoints/endpoint1"
-	"github.com/telemac/natsservice/examples/service/endpoints/endpoint2"
+	"github.com/telemac/natsservice/examples/service/endpoints/endpoint_can_panic"
 	"github.com/telemac/natsservice/examples/service/pkg/counter"
 )
 
@@ -40,7 +40,7 @@ func main() {
 		Ctx:         ctx,
 		Nc:          nc,
 		Js:          js,
-		Logger:      log,
+		Logger:      log.With("service", "demo-service"),
 		Name:        "demo-service",
 		Group:       "demo",
 		Version:     "0.0.1",
@@ -57,10 +57,10 @@ func main() {
 	commonCounter := &counter.CommonCounter{}
 
 	endpoin1 := endpoint1.New(commonCounter)
-	endpoin2 := endpoint2.New(commonCounter)
+	endpointCanPanic := endpoint_can_panic.New(commonCounter)
 	addEndpoint := add.New()
 
-	err = service.AddEndpoints(endpoin1, endpoin2, addEndpoint)
+	err = service.AddEndpoints(endpoin1, endpointCanPanic, addEndpoint)
 	if err != nil {
 		log.Error("Failed to add endpoint 1", "error", err)
 		return

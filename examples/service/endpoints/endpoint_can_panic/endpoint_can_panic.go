@@ -1,4 +1,4 @@
-package endpoint2
+package endpoint_can_panic
 
 import (
 	"github.com/nats-io/nats.go/micro"
@@ -21,19 +21,25 @@ func (e *Endpoint2) Config() *natsservice.EndpointConfig {
 	return &natsservice.EndpointConfig{
 		Name: "endpoint2",
 		Metadata: map[string]string{
-			"service": e.Service().Config().Name,
-			"version": "1.0.0",
-			"author":  "telemac",
+			"service":     e.Service().Config().Name,
+			"description": "recovers from panic",
+			"version":     "1.0.0",
+			"author":      "telemac",
 		},
-		QueueGroup: "queue",
-		Subject:    "",
-		UserData:   12345,
 	}
 }
 
 func (e *Endpoint2) Handle(request micro.Request) {
-	log := e.Service().Logger()
+	// RecoverPanic protects the service from crashes by catching any panic
+	// and returning a proper error response to the client
+	defer natsservice.RecoverPanic(e, request)
+	log := e.Service().Logger().With("endpoint", e.Config().Name)
+
 	e.Common.Increment()
+	if e.Common.Counter() > 5 {
+		// This panic will be caught by RecoverPanic above
+		panic("counter overflow")
+	}
 	log.Info("endpoint handler",
 		"service", e.Service().Config().Name,
 		"endpoint", e.Config().Name,
