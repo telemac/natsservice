@@ -82,5 +82,23 @@ nats req demo.greet "Alexandre"
 ### Multi-Endpoint Service
 See [examples/demo_service](./examples/demo_service) - Demonstrates multiple endpoints sharing a common counter.
 
+### User Management Service
+See [examples/user_service](./examples/user_service) - A complete user management service with validation and persistence.
+
+```bash
+cd examples/user_service
+go run main.go
+nats req user_service.add '{"user":{"first_name":"John","last_name":"Doe","email":"john.doe@example.com"}}'
+# Response: {"uuid":"018f5e7c-8b5a-7a1b-8c5d-123456789abc"}
+```
+
+Features:
+- User validation with required fields (FirstName, LastName, Email)
+- In-memory user storage with UUID generation
+- Comprehensive API documentation with examples
+- Error handling and RecoverPanic protection
+
+See the [endpoint documentation](examples/user_service/endpoints/) for complete usage examples.
+
 
 
