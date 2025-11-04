@@ -10,6 +10,7 @@ import (
 	"github.com/telemac/natsservice"
 	"github.com/telemac/natsservice/examples/user_service/endpoints"
 	"github.com/telemac/natsservice/examples/user_service/pkg/user_store"
+	keyvalue2 "github.com/telemac/natsservice/pkg/keyvalue"
 )
 
 const SERVICE_NAME = "user_service"
@@ -58,13 +59,22 @@ func main() {
 	}
 	defer service.Stop()
 
-	userStore := user_store.NewMemoryUserStore()
+	// create jetstream kv user store
+	kvStore, err := keyvalue2.NewJetStreamKV(ctx, js, "users", "", nil)
+	if err != nil {
+		log.Error("Failed to create key value store", "error", err)
+		return
+	}
+
+	// create user store with undelrying jetstream kv
+	userStore := user_store.NewKvUserStore(ctx, kvStore)
 
 	err = service.AddEndpoints(
 		endpoints.NewUserAddEndpoint(userStore),
+		endpoints.NewUserGetEndpoint(userStore),
 	)
 	if err != nil {
-		log.Error("Failed to add endpoint 1", "error", err)
+		log.Error("Failed to add endpoints", "error", err)
 		return
 	}
 

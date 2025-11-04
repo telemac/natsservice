@@ -28,16 +28,16 @@ func (store *MemoryUserStore) Add(user *model.User) error {
 	}
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
-	store.users[user.Email] = *user
+	store.users[user.Uuid] = *user
 	return nil
 }
 
-func (store *MemoryUserStore) Get(email string) (model.User, error) {
+func (store *MemoryUserStore) Get(uuid string) (model.User, error) {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
-	user, ok := store.users[email]
+	user, ok := store.users[uuid]
 	if !ok {
-		return model.User{}, errors.New("User not found")
+		return model.User{}, errors.New("user not found")
 	}
 	return user, nil
 }
