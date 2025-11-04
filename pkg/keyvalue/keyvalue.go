@@ -9,7 +9,6 @@ import (
 var (
 	ErrKeyNotFound = errors.New("key not found")
 	ErrEmptyKey    = errors.New("empty is key")
-	ErrInvalidTTL  = errors.New("invalid TTL value")
 )
 
 // SetOption is a functional option for Set operations

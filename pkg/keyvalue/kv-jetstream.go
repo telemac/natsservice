@@ -183,28 +183,17 @@ func (kv *JetStreamKV) DeleteTyped(ctx context.Context, key string) error {
 
 // --- Additional Helper Methods ---
 
-// Keys returns all keys with optional prefix filter
-func (kv *JetStreamKV) Keys(ctx context.Context, prefix ...string) ([]string, error) {
-
-	var filter string
-	if len(prefix) > 0 && prefix[0] != "" {
-		filter = prefix[0] + "*"
-	}
-
-	keys, err := kv.bucket.Keys(ctx, jetstream.IgnoreDeletes())
+// Keys returns all keys
+func (kv *JetStreamKV) Keys(ctx context.Context) ([]string, error) {
+	keyLister, err := kv.bucket.ListKeys(ctx, jetstream.IgnoreDeletes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to list keys: %w", err)
 	}
+	defer keyLister.Stop()
 
-	// Filter by prefix if provided
-	if filter != "" {
-		filtered := make([]string, 0)
-		for _, k := range keys {
-			if len(k) >= len(prefix[0]) && k[:len(prefix[0])] == prefix[0] {
-				filtered = append(filtered, k)
-			}
-		}
-		return filtered, nil
+	var keys []string
+	for key := range keyLister.Keys() {
+		keys = append(keys, key)
 	}
 
 	return keys, nil
@@ -216,12 +205,13 @@ func (kv *JetStreamKV) Watch(ctx context.Context, key string) (jetstream.KeyWatc
 }
 
 // WatchAll watches for changes to all keys with optional prefix
-func (kv *JetStreamKV) WatchAll(ctx context.Context, prefix ...string) (jetstream.KeyWatcher, error) {
-	// Note: Current NATS JetStream KV API doesn't support prefix filtering in WatchAll
-	// This would need to be handled at the application level by filtering the updates
-	// For now, we ignore the prefix parameter and watch all keys
-
+func (kv *JetStreamKV) WatchAll(ctx context.Context) (jetstream.KeyWatcher, error) {
 	return kv.bucket.WatchAll(ctx, jetstream.IgnoreDeletes())
+}
+
+// WatchFiltered watches multiple keys for changes based on specified filters and options. Returns a KeyWatcher or an error.
+func (kv *JetStreamKV) WatchFiltered(ctx context.Context, keys []string, opts ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
+	return kv.bucket.WatchFiltered(ctx, keys, opts...)
 }
 
 // Purge deletes all versions of a key
@@ -272,4 +262,52 @@ func (kv *JetStreamKV) History(ctx context.Context, key string) ([]jetstream.Key
 	}
 
 	return entries, nil
+}
+
+// SynchronizeWithKV synchronizes a set of keys between the current KV store and a destination KeyValuer.
+// It uses a filtered watcher to monitor changes to the specified keys and applies updates to the destination KV.
+// Returns an error if the watcher fails, if the context is canceled, or if updates cannot be applied to the destination.
+func (kv *JetStreamKV) SynchronizeWithKV(ctx context.Context, keys []string, destKv KeyValuer) error {
+	keyWatcher, err := kv.WatchFiltered(ctx, keys)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		keyWatcher.Stop()
+	}()
+
+	count := 0
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case update, ok := <-keyWatcher.Updates():
+			if !ok {
+				return nil
+			}
+			if update == nil {
+				continue // Skip nil entries
+			}
+			switch update.Operation() {
+			case jetstream.KeyValuePut:
+				err = destKv.Set(ctx, update.Key(), update.Value())
+				if err != nil {
+					return fmt.Errorf("failed to set value for key %s: %w", update.Key(), err)
+				}
+				//if count%100 == 0 {
+				fmt.Printf("copy to kv %s\n", update.Key())
+				//}
+				count++
+			case jetstream.KeyValueDelete:
+				err = destKv.Delete(ctx, update.Key())
+				if err != nil {
+					return fmt.Errorf("failed to delete value for key %s: %w", update.Key(), err)
+				}
+			case jetstream.KeyValuePurge:
+				err = destKv.Delete(ctx, update.Key())
+			}
+
+		}
+	}
 }
