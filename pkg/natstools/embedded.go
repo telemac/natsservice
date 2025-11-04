@@ -53,11 +53,12 @@ type EmbeddedOptions struct {
 // DefaultOptions returns sensible defaults for embedded server
 func DefaultOptions() *EmbeddedOptions {
 	return &EmbeddedOptions{
-		InProcessOnly:   true,
+		InProcessOnly:   false,
+		DataDir:         "/tmp/embedded-test-nats",
 		Host:            "127.0.0.1",
-		Port:            0,
+		Port:            4222,
 		EnableJetStream: true,
-		MaxMemory:       256 * 1024 * 1024, // 256MB
+		MaxMemory:       256 * 1024 * 1024,  // 256MB
 		MaxStore:        1024 * 1024 * 1024, // 1GB
 		EnableLogging:   false,
 		LogLevel:        "ERROR",
@@ -87,11 +88,11 @@ func StartEmbeddedWithOptions(opts *EmbeddedOptions) (*EmbeddedServer, error) {
 
 	// Build server options
 	serverOpts := &server.Options{
-		DontListen: opts.InProcessOnly,
-		Host:       opts.Host,
-		Port:       opts.Port,
-		NoLog:      !opts.EnableLogging,
-		NoSigs:     true,
+		DontListen:     opts.InProcessOnly,
+		Host:           opts.Host,
+		Port:           opts.Port,
+		NoLog:          !opts.EnableLogging,
+		NoSigs:         true,
 		MaxControlLine: 2048,
 		MaxPayload:     1024 * 1024, // 1MB default
 	}

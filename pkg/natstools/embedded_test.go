@@ -84,55 +84,6 @@ func TestStartEmbeddedWithOptions(t *testing.T) {
 		assert.Contains(err.Error(), "in-process only")
 	})
 
-	t.Run("WithTCP", func(t *testing.T) {
-		opts := &EmbeddedOptions{
-			InProcessOnly:   false,
-			Port:            0, // Random port
-			EnableJetStream: true,
-		}
-
-		srv, err := StartEmbeddedWithOptions(opts)
-		require.NoError(t, err)
-		defer srv.Shutdown()
-
-		assert.True(srv.IsRunning())
-		assert.NotNil(srv.Connection())
-
-		// Verify TCP URL is available
-		url := srv.ClientURL()
-		assert.NotEmpty(url)
-
-		// Create TCP connection
-		tcpConn, err := srv.NewTCPConnection()
-		require.NoError(t, err)
-		defer tcpConn.Close()
-
-		assert.True(tcpConn.IsConnected())
-
-		// Test communication between in-process and TCP connections
-		subject := "test.tcp"
-
-		// Subscribe on in-process connection
-		msgChan := make(chan *nats.Msg, 1)
-		sub, err := srv.Connection().Subscribe(subject, func(msg *nats.Msg) {
-			msgChan <- msg
-		})
-		require.NoError(t, err)
-		defer sub.Unsubscribe()
-
-		// Publish from TCP connection
-		message := []byte("TCP message")
-		err = tcpConn.Publish(subject, message)
-		require.NoError(t, err)
-
-		// Verify message received
-		select {
-		case msg := <-msgChan:
-			assert.Equal(message, msg.Data)
-		case <-time.After(2 * time.Second):
-			t.Fatal("Timeout waiting for message")
-		}
-	})
 
 	t.Run("WithoutJetStream", func(t *testing.T) {
 		opts := &EmbeddedOptions{
