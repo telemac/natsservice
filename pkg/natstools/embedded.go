@@ -53,7 +53,7 @@ type EmbeddedOptions struct {
 // DefaultOptions returns sensible defaults for embedded server
 func DefaultOptions() *EmbeddedOptions {
 	return &EmbeddedOptions{
-		InProcessOnly:   false,
+		InProcessOnly:   true,
 		DataDir:         "/tmp/embedded-test-nats",
 		Host:            "127.0.0.1",
 		Port:            4222,

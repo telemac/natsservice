@@ -296,7 +296,7 @@ func (kv *JetStreamKV) SynchronizeWithKV(ctx context.Context, keys []string, des
 					return fmt.Errorf("failed to set value for key %s: %w", update.Key(), err)
 				}
 				//if count%100 == 0 {
-				fmt.Printf("copy to kv %s\n", update.Key())
+				//fmt.Printf("copy to kv %s\n", update.Key())
 				//}
 				count++
 			case jetstream.KeyValueDelete:
